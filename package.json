@@ -1,0 +1,11 @@
+{
+  "name": "ts-template",
+  "version": "0.0.1",
+  "description": "Typescript Project starting template",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kevin LaFlamme",
+  "license": "MIT"
+}
