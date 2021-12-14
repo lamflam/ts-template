@@ -4,7 +4,7 @@
     "description": "Typescript Project starting template",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "jest --watchAll",
         "lint": "eslint src/*"
     },
     "author": "Kevin LaFlamme",
@@ -21,6 +21,7 @@
         "eslint-plugin-prettier": "^4.0.0",
         "jest": "^27.4.4",
         "prettier": "^2.5.1",
+        "ts-jest": "^27.1.1",
         "typescript": "^4.5.3"
     }
 }
