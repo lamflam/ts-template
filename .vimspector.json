@@ -1,0 +1,23 @@
+{
+    "configurations": {
+        "test": {
+            "adapter": "vscode-node",
+            "breakpoints": {
+                "exception": {
+                    "all": "N",
+                    "uncaught": "Y"
+                }
+            },
+            "configuration": {
+                "request": "launch",
+                "name": "Jest debugger",
+                "type": "node",
+                "console": "integratedTerminal",
+                "program": "${workspaceRoot}/node_modules/.bin/jest",
+                "skipFiles": ["*/<node_internals>/**/*.js", "node_modules/**/*.js"],
+                "cwd": "${workspaceRoot}",
+                "args": ["--runInBand", "--watchAll"]
+            }
+        }
+    }
+}
