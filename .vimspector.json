@@ -5,7 +5,7 @@
             "breakpoints": {
                 "exception": {
                     "all": "N",
-                    "uncaught": "Y"
+                    "uncaught": "N"
                 }
             },
             "configuration": {
