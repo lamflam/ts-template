@@ -18,6 +18,21 @@
                 "cwd": "${workspaceRoot}",
                 "args": ["--runInBand", "--watchAll"]
             }
+        },
+        "chrome": {
+            "adapter": "chrome",
+            "breakpoints": {
+                "exception": {
+                    "all": "N",
+                    "uncaught": "N"
+                }
+            },
+            "configuration": {
+                "request": "launch",
+                "name": "Chrome debugger",
+                "url": "http://localhost:9999",
+                "webRoot": "${workspaceRoot}/src"
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 import { join } from 'path';
-import { build, BuildOptions, BuildResult } from 'esbuild';
+import { createServer, ServerResponse } from 'http';
+import { build, BuildOptions, BuildResult, Plugin, serve } from 'esbuild';
 import { globby } from 'globby';
 import yargs from 'yargs/yargs';
 import chokidar, { FSWatcher } from 'chokidar';
@@ -10,17 +11,20 @@ interface Watchers {
 
 const srcPath = join(process.cwd(), '/src');
 const srcGlob = `${srcPath}/**/*.{ts,tsx,css}`;
-const ignoreGlobs = [`!${srcPath}/build.ts`, `!${srcPath}/**/*test.ts`];
 
 const sharedConfig: BuildOptions = {
     sourcemap: true,
     target: 'es6',
     tsconfig: 'tsconfig-build.json',
+    entryPoints: [`src/index.tsx`],
+    bundle: true,
+    loader: {
+        '.svg': 'file',
+    },
 };
 
-async function buildAll(watchers?: Watchers) {
+async function buildAll(plugins: Plugin[], watchers?: Watchers) {
     console.time('Built in');
-    const files = await globby([srcGlob, ...ignoreGlobs]);
     let buildResult: BuildResult | undefined;
 
     async function doBuild() {
@@ -29,9 +33,9 @@ async function buildAll(watchers?: Watchers) {
         } else {
             buildResult = await build({
                 ...sharedConfig,
-                entryPoints: files,
                 outdir: 'dist',
                 format: 'cjs',
+                plugins,
                 incremental: !!watchers,
             });
         }
@@ -58,12 +62,55 @@ async function buildAll(watchers?: Watchers) {
     console.timeEnd('Built in');
 }
 
+async function serveAll(port: number, watchers: Watchers, plugins: Plugin[]) {
+    const serveResult = await serve(
+        {
+            port,
+            servedir: 'src',
+            onRequest: ({ method, path, timeInMS }) => {
+                console.log(`${method} ${path} ${timeInMS}ms`);
+            },
+        },
+        {
+            ...sharedConfig,
+            banner: {
+                js: ` (() => new EventSource("http://localhost:${port + 1}").onmessage = () => location.reload())();`,
+            },
+            outfile: 'src/index.js',
+            plugins,
+            incremental: true,
+            write: false,
+        }
+    );
+
+    const clients: ServerResponse[] = [];
+    watchers.src.on('all', () => {
+        clients.forEach((res) => res.write('data: update\n\n'));
+        clients.length = 0;
+    });
+
+    createServer((req, res) => {
+        res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Access-Control-Allow-Origin': '*',
+            Connection: 'keep-alive',
+        });
+        return clients.push(res);
+    }).listen(port + 1);
+
+    console.log(`Listening on ${serveResult.host}:${port}`);
+    return serveResult;
+}
+
 interface Arguments {
+    port: number;
     watch: boolean;
 }
 
 async function cli() {
     const args: Arguments = await yargs(process.argv.slice(2)).options({
+        port: { type: 'number', default: 9999 },
         watch: { type: 'boolean', default: false },
     }).argv;
 
@@ -71,9 +118,10 @@ async function cli() {
         const watchers: Watchers = {
             src: chokidar.watch([srcGlob], { ignoreInitial: true }),
         };
-        await buildAll(watchers);
+        await serveAll(args.port, watchers, []);
+        await buildAll([], watchers);
     } else {
-        await buildAll();
+        await buildAll([]);
     }
 }
 
