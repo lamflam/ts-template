@@ -1,12 +1,39 @@
 import { join } from 'path';
+import { readFile } from 'fs/promises';
 import { createServer, ServerResponse } from 'http';
-import { build, BuildOptions, BuildResult, Plugin, serve } from 'esbuild';
-import { globby } from 'globby';
+import { build, BuildOptions, BuildResult, OnLoadResult, Plugin, serve } from 'esbuild';
+import minimatch from 'minimatch';
 import yargs from 'yargs/yargs';
 import chokidar, { FSWatcher } from 'chokidar';
+import postcss from 'postcss';
+import postcssLoadConfig from 'postcss-load-config';
 
 interface Watchers {
     src: FSWatcher;
+}
+
+function postcssPlugin(): Plugin {
+    return {
+        name: 'postcss',
+        setup: (build) => {
+            build.onLoad({ filter: /\.css$/, namespace: 'file' }, async ({ path }) => {
+                if (minimatch(path, `${srcPath}/**/*.css`)) {
+                    const { plugins, options } = await postcssLoadConfig();
+                    const css = await readFile(path, 'utf-8');
+                    const res = await postcss(plugins).process(css, {
+                        ...options,
+                        from: path,
+                    });
+                    const result: OnLoadResult = {
+                        contents: res.css,
+                        loader: 'css',
+                    };
+                    return result;
+                }
+                return null;
+            });
+        },
+    };
 }
 
 const srcPath = join(process.cwd(), '/src');
@@ -114,14 +141,16 @@ async function cli() {
         watch: { type: 'boolean', default: false },
     }).argv;
 
+    const plugins = [postcssPlugin()];
+
     if (args.watch) {
         const watchers: Watchers = {
             src: chokidar.watch([srcGlob], { ignoreInitial: true }),
         };
-        await serveAll(args.port, watchers, []);
-        await buildAll([], watchers);
+        await serveAll(args.port, watchers, plugins);
+        await buildAll(plugins, watchers);
     } else {
-        await buildAll([]);
+        await buildAll(plugins);
     }
 }
 
