@@ -9,7 +9,8 @@
         "build:js": "npm run ts src/build.ts",
         "build:types": "tsc -p tsconfig-build.json --emitDeclarationOnly",
         "build:watch:js": "npm run ts src/build.ts -- --watch",
-        "start": "npm-run-all build:watch:*",
+        "build:watch:types": "tsc -p tsconfig-build.json --emitDeclarationOnly --watch --preserveWatchOutput",
+        "start": "run-p build:watch:*",
         "test": "jest --watchAll",
         "lint": "eslint src/*",
         "ts": "node -r esbuild-register"
