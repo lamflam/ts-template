@@ -3,7 +3,6 @@ module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'jsdom',
     moduleNameMapper: {
-        '\\.(scss|sass|css)$': '<rootDir>/style.mock.js',
+        '\\.(scss|sass|css)$': '<rootDir>/.mocks/style.mock.js',
     },
 };
-
