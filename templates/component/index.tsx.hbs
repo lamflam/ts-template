@@ -1,0 +1,29 @@
+import React, { ReactElement, ReactNode } from 'react';
+import './styles.css';
+
+/**
+ */
+interface {{name}}SharedProps {
+    children?: ReactNode;
+}
+
+/**
+ */
+interface {{name}}UIProps  extends {{name}}SharedProps {}
+
+export function {{name}}UI(props: {{{name}}}UIProps): ReactElement {
+    const { children } = props;
+    return <div>{children || '{{name}}UI'}</div>;
+};
+
+/** 
+ */
+export interface {{name}}Props extends {{name}}SharedProps {}
+
+/**
+ * Renders {{name}}
+ */
+export function {{name}}(props: {{{name}}}Props): ReactElement {
+    const { children } = props;
+    return <{{name}}UI>{children}</{{name}}UI>;
+};

@@ -1,0 +1,11 @@
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+
+import { {{name}} } from '.';
+
+describe('{{name}}', () => {
+    test('renders', () => {
+        render(<{{name}} />);
+        screen.getByText('{{name}}UI');
+    });
+});
