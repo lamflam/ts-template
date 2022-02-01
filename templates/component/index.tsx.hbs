@@ -1,29 +1,24 @@
-import React, { ReactElement, ReactNode } from 'react';
+import React, { FC } from 'react';
 import './styles.css';
 
-/**
- */
-interface {{name}}SharedProps {
-    children?: ReactNode;
-}
 
 /**
  */
-interface {{name}}UIProps  extends {{name}}SharedProps {}
+interface {{name}}UIProps {}
 
-export function {{name}}UI(props: {{{name}}}UIProps): ReactElement {
+export const {{name}}UI: FC<{{name}}UIProps> = (props) => {
     const { children } = props;
     return <div>{children || '{{name}}UI'}</div>;
 };
 
 /** 
  */
-export interface {{name}}Props extends {{name}}SharedProps {}
+export interface {{name}}Props {}
 
 /**
  * Renders {{name}}
  */
-export function {{name}}(props: {{{name}}}Props): ReactElement {
+export const {{name}}: FC<{{name}}Props> = (props) => {
     const { children } = props;
     return <{{name}}UI>{children}</{{name}}UI>;
 };
